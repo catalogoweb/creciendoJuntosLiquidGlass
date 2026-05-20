@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeyaSchool - El Futuro de la Gestión Educativa Integral</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <style>
+        /* Variables del Sistema - Paleta Liquid Glass */
+        :root {
+            --bg-dark: #050811;
+            --bg-dark-secondary: #0b1120;
+            --primary: #4f46e5;       /* Indigo */
+            --primary-light: #818cf8;
+            --primary-glow: rgba(79, 70, 229, 0.15);
+            --secondary: #06b6d4;     /* Cyan */
+            --secondary-light: #67e8f9;
+            --secondary-glow: rgba(6, 182, 212, 0.15);
+            --accent: #ec4899;        /* Rosa Brillante */
+            --accent-glow: rgba(236, 72, 153, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-hover: rgba(255, 255, 255, 0.18);
+            --text-white: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dark: #64748b;
+            --radius-xl: 32px;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Resets Generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Ambient Orbs - Efecto Liquid Background */
+        .ambient-glow {
+            position: absolute;
+            width: 100vw;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.25;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            top: -100px;
+            left: -200px;
+            animation: floatOrb 25s infinite alternate ease-in-out;
+        }
+
+        .orb-2 {
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+            top: 30%;
+            right: -300px;
+            animation: floatOrb 30s infinite alternate-reverse ease-in-out;
+        }
+
+        .orb-3 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            bottom: 5%;
+            left: -100px;
+            animation: floatOrb 20s infinite alternate ease-in-out;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(80px, 40px) scale(1.15); }
+            100% { transform: translate(-40px, -60px) scale(0.9); }
+        }
+
+        /* Estructura y Contenedor Principal */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        /* Barra de Navegación (Glass Header) */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(5, 8, 17, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            background: rgba(5, 8, 17, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        /* Logo VeyaSchool */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-white);
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fff 40%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo svg {
+            filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.5));
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            color: var(--text-white);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Botón Estilo Liquid Glass */
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-white);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), inset 0 0 8px rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 0.9rem 2rem;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 8px 30px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(6, 182, 212, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.2);
+            filter: brightness(1.1);
+        }
+
+        /* Burger Menu Móvil */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-white);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Héroe (Hero Section) */
+        .hero {
+            padding: 160px 0 100px;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            align-items: center;
+            gap: 4rem;
+            position: relative;
+        }
+
+        .hero-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .hero-tag {
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: var(--secondary-light);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.1);
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { border-color: rgba(6, 182, 212, 0.2); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.05); }
+            100% { border-color: rgba(6, 182, 212, 0.5); box-shadow: 0 4px 20px rgba(6, 182, 212, 0.2); }
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 30%, #e2e8f0 70%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1.25rem;
+            margin-bottom: 3.5rem;
+        }
+
+        /* Stats Row */
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 2rem;
+            width: 100%;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-white);
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fff 0%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-lbl {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+        }
+
+        /* iPhone Mockup (Liquid Glass 3D Interactive) */
+        .mockup-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        .iphone {
+            width: 300px;
+            height: 600px;
+            background: #090e1a;
+            border-radius: 48px;
+            border: 11px solid #1e293b;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8),
+                        0 0 0 2px rgba(255, 255, 255, 0.1),
+                        0 0 40px rgba(79, 70, 229, 0.2);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.2, 1, 0.2, 1);
+        }
+
+        /* Vidrio Líquido Reflejo */
+        .iphone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.05) 51%, rgba(255, 255, 255, 0) 100%);
+            transform: translate(-50%, -50%) rotate(-10deg);
+            z-index: 10;
+            pointer-events: none;
+            transition: transform 0.5s ease;
+        }
+
+        .iphone-island {
+            width: 100px;
+            height: 25px;
+            background: #000;
+            border-radius: 20px;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.2);
+        }
+
+        .iphone-screen {
+            width: 100%;
+            height: 100%;
+            padding: 45px 16px 20px;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at 50% 0%, var(--bg-dark-secondary), var(--bg-dark));
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .iphone-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Contenido del Dashboard en iPhone (Simulador Vivo) */
+        .sim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .sim-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sim-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .sim-user-info span {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .sim-user-info h5 {
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .sim-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .sim-card-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sim-card-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fff, var(--secondary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sim-badge {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--secondary-light);
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        /* Lista de Asistencia Simulada */
+        .sim-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.75rem;
+        }
+
+        .sim-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .sim-student {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sim-student-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .sim-student-dot.absent {
+            background: #ef4444;
+        }
+
+        /* Mini Gráfico */
+        .sim-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 60px;
+            padding-top: 10px;
+        }
+
+        .sim-chart-bar {
+            width: 15%;
+            background: linear-gradient(0deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(6, 182, 212, 0.2);
+        }
+
+        /* Mensajes Simulados */
+        .sim-msg {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .sim-msg-bubble {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0 12px 12px 12px;
+            color: #e2e8f0;
+        }
+
+        .sim-msg-author {
+            font-weight: 700;
+            color: var(--secondary-light);
+            margin-bottom: 0.15rem;
+            font-size: 0.65rem;
+        }
+
+        /* Sección Pilares del Sistema (Grid Características) */
+        .features-section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 5rem;
+        }
+
+        .section-header .tag {
+            color: var(--primary-light);
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+            pointer-events: none;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                        0 0 25px var(--primary-glow);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .glass-card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .icon-primary {
+            background: rgba(79, 70, 229, 0.15);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            color: var(--primary-light);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.15);
+        }
+
+        .icon-secondary {
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: var(--secondary-light);
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.15);
+        }
+
+        .icon-accent {
+            background: rgba(236, 72, 153, 0.15);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            color: var(--accent);
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.15);
+        }
+
+        .glass-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-white);
+        }
+
+        .glass-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .glass-card-footer {
+            margin-top: auto;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--secondary-light);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .glass-card:hover .glass-card-footer {
+            transform: translateX(4px);
+        }
+
+        /* Vitrina Interactiva de Módulos */
+        .showcase-section {
+            padding: 100px 0;
+            background: relative;
+        }
+
+        .showcase-wrapper {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 3.5rem;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 4rem;
+            align-items: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .showcase-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .showcase-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+
+        .showcase-btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .showcase-btn-text h4 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .showcase-btn-text p {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        .showcase-btn:hover {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .showcase-btn.active {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+
+        .showcase-btn.active .showcase-btn-icon {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .showcase-btn.active .showcase-btn-text h4 {
+            color: white;
+        }
+
+        .showcase-btn.active .showcase-btn-text p {
+            color: var(--text-muted);
+        }
+
+        /* Ventana de Visualización del Portal Simulada */
+        .showcase-display {
+            position: relative;
+            background: #090e19;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            height: 480px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .window-bar {
+            height: 44px;
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+        .window-dot:nth-child(2) { background: #f59e0b; }
+        .window-dot:nth-child(3) { background: #10b981; }
+
+        .window-title {
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .window-actions {
+            width: 40px;
+        }
+
+        .showcase-content {
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        /* Vistas Dinámicas */
+        .portal-view {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            right: 2rem;
+            bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.2, 1, 0.2, 1), transform 0.5s cubic-bezier(0.2, 1, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .portal-view.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Estilo Dashboard Admin */
+        .admin-header-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .admin-card-metric {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .admin-metric-label {
+            font-size: 0.75rem;
+            color: var(--text-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .admin-metric-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin-top: 0.25rem;
+        }
+
+        .admin-chart-mock {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mock-chart-lines {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding-top: 1rem;
+        }
+
+        .mock-chart-col {
+            flex: 1;
+            background: linear-gradient(180deg, var(--primary) 0%, rgba(79, 70, 229, 0.1) 100%);
+            border-radius: 6px 6px 0 0;
+            height: 0%;
+            transition: height 0.8s ease;
+            position: relative;
+        }
+
+        /* Estilo Vista Maestro */
+        .teacher-view-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .mock-list {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            overflow-y: auto;
+        }
+
+        .mock-list-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--secondary-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .teacher-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+
+        .teacher-input-mock {
+            width: 45px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: white;
+            text-align: center;
+            padding: 0.2rem;
+            font-weight: 700;
+        }
+
+        /* Estilo Vista Estudiante */
+        .student-portal-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .student-performance {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .student-circle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .student-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--bg-dark-secondary) 40%, transparent 41%),
+                        conic-gradient(var(--secondary) 0% 92%, rgba(255,255,255,0.05) 92% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--secondary-glow);
+        }
+
+        .student-circle-val {
+            font-size: 1.3rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Colegios Aliados (Social Proof) */
+        .schools-section {
+            padding: 100px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .schools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .school-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .school-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(6, 182, 212, 0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3), 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+
+        .school-logo-mock {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.08) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            color: var(--secondary-light);
+            box-shadow: inset 0 0 8px rgba(255,255,255,0.05);
+        }
+
+        .school-card h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-white);
+        }
+
+        .school-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .school-tag {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 100px;
+            font-weight: 700;
+            margin-top: 0.75rem;
+        }
+
+        /* Llamado a la Acción (CTA de Cierre) */
+        .cta-section {
+            padding: 100px 0 140px;
+            position: relative;
+        }
+
+        .cta-wrapper {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: 5rem 3rem;
+            text-align: center;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        .cta-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+            top: -150px;
+            right: -150px;
+            opacity: 0.3;
+            pointer-events: none;
+            filter: blur(50px);
+        }
+
+        .cta-wrapper h2 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #e2e8f0 50%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cta-wrapper p {
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #02040a;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 4rem 0 2rem;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .footer-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--text-white);
+        }
+
+        /* Adaptabilidad (Responsive Queries) */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding-top: 140px;
+                gap: 3rem;
+            }
+
+            .hero-info {
+                align-items: center;
+            }
+
+            .hero h1 {
+                font-size: 3.2rem;
+            }
+
+            .hero p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-actions {
+                justify-content: center;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .showcase-wrapper {
+                grid-template-columns: 1fr;
+                padding: 2rem;
+                gap: 2.5rem;
+            }
+
+            .showcase-display {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header nav {
+                display: none; /* Simplificado para móviles en esta versión */
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .cta-wrapper h2 {
+                font-size: 2.5rem;
+            }
+
+            .cta-wrapper {
+                padding: 3rem 1.5rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Capa de Fondo - Efectos de Luz Líquida -->
+    <div class="ambient-glow">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Navegación Sticky -->
+    <header id="main-header">
+        <div class="container nav-wrapper">
+            <!-- Logo SVG Animado -->
+            <a href="#" class="logo">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="32" height="32" rx="10" fill="url(#logo-grad-1)" />
+                    <rect x="2" y="2" width="32" height="32" rx="10" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" />
+                    <!-- Símbolo de Birrete y Conexión de Red -->
+                    <path d="M18 10L27 14.5L18 19L9 14.5L18 10Z" fill="white" />
+                    <path d="M12.5 17.5V23C12.5 24.5 15 26 18 26C21 26 23.5 24.5 23.5 23V17.5L18 20.25L12.5 17.5Z" fill="rgba(255,255,255,0.85)" />
+                    <circle cx="18" cy="14.5" r="2.5" fill="var(--secondary-light)" />
+                    <defs>
+                        <linearGradient id="logo-grad-1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#4f46e5" />
+                            <stop offset="1" stop-color="#06b6d4" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>VeyaSchool</span>
+            </a>
+
+            <!-- Enlaces de Navegación -->
+            <nav>
+                <a href="#features">Pilares</a>
+                <a href="#showcase">Módulos</a>
+                <a href="#schools">Colegios Aliados</a>
+                <a href="./app.html" class="btn-glass">
+                    <i data-lucide="log-in" style="width:16px;height:16px;"></i>
+                    Acceder al Portal
+                </a>
+            </nav>
+
+            <button class="menu-toggle" id="menu-btn" onclick="window.location.href='./app.html'">
+                <i data-lucide="log-in"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sección Héroe -->
+    <section class="container hero">
+        <div class="hero-info">
+            <div class="hero-tag">
+                <i data-lucide="sparkles" style="width:14px;height:14px;"></i>
+                Plataforma Educativa Inteligente
+            </div>
+            <h1>El Futuro de la Gestión Educativa, Hoy</h1>
+            <p>VeyaSchool une a administradores, maestros, estudiantes y coordinadores en un ecosistema digital integrado bajo una estética "Liquid Glass" fluida, veloz y altamente intuitiva.</p>
+            <div class="hero-actions">
+                <a href="./app.html" class="btn-primary-gradient">
+                    Comenzar Ahora
+                    <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+                </a>
+                <a href="#features" class="btn-glass">
+                    Ver Características
+                </a>
+            </div>
+            
+            <!-- Estadísticas Clave -->
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-val">100%</span>
+                    <span class="stat-lbl">Integral e Integrado</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">&lt; 0.1s</span>
+                    <span class="stat-lbl">Tiempo de Respuesta</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val">Bajo Costo</span>
+                    <span class="stat-lbl">Sin Licencias por Alumno</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teléfono Interactivo CSS/Glass -->
+        <div class="mockup-container">
+            <div class="iphone" id="interactive-phone">
+                <div class="iphone-island"></div>
+                <div class="iphone-screen">
+                    <div class="sim-header">
+                        <div class="sim-user">
+                            <div class="sim-avatar">AD</div>
+                            <div class="sim-user-info">
+                                <h5>Admin Veya</h5>
+                                <span>Colegio Camporeal</span>
+                            </div>
+                        </div>
+                        <i data-lucide="bell" style="width:16px;height:16px;color:var(--text-muted);"></i>
+                    </div>
+
+                    <!-- Tarjeta de Asistencia -->
+                    <div class="sim-card">
+                        <div class="sim-card-title">
+                            Asistencia General
+                            <span class="sim-badge">94.8% Hoy</span>
+                        </div>
+                        <div class="sim-card-val">248 / 262</div>
+                        
+                        <div class="sim-list-item" style="margin-top:0.75rem;">
+                            <div class="sim-student">
+                                <div class="sim-student-dot"></div>
+                                <span>Ma. Alejandra Ortiz</span>
+                            </div>
+                            <span style="color:#10b981;font-weight:700;">PRESENTE</span>
+                        </div>
+                        <div class="sim-list-item">
+                            <div class="sim-student">
+                                <div class="sim-student-dot absent"></div>
+                                <span>Carlos E. Mendoza</span>
+                            </div>
+                            <span style="color:#ef4444;font-weight:700;">AUSENTE</span>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de Promedio de Notas (Gráfico) -->
+                    <div class="sim-card">
+                        <div class="sim-card-title">
+                            Rendimiento Global
+                            <span class="sim-badge" style="background:rgba(79,70,229,0.2);color:var(--primary-light);">Media 88/100</span>
+                        </div>
+                        <div class="sim-chart">
+                            <div class="sim-chart-bar" style="height: 75%"></div>
+                            <div class="sim-chart-bar" style="height: 85%"></div>
+                            <div class="sim-chart-bar" style="height: 60%"></div>
+                            <div class="sim-chart-bar" style="height: 95%"></div>
+                            <div class="sim-chart-bar" style="height: 90%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mensajería Interna Simulada -->
+                    <div class="sim-card" style="margin-bottom:0;">
+                        <div class="sim-card-title">
+                            Mensajes Recientes
+                        </div>
+                        <div class="sim-msg">
+                            <div class="sim-avatar" style="width:24px;height:24px;font-size:0.6rem;flex-shrink:0;">MC</div>
+                            <div class="sim-msg-bubble">
+                                <div class="sim-msg-author">Coordinación Camporeal</div>
+                                Ya he cargado los horarios actualizados para ciencias.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pilares del Sistema -->
+    <section class="container features-section" id="features">
+        <div class="section-header">
+            <span class="tag">Pilares VeyaSchool</span>
+            <h2>Diseñado para la Excelencia Educativa</h2>
+            <p>Una suite robusta pensada para facilitar la administración y acelerar los procesos académicos, reduciendo costos operativos y tecnológicos.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Pilar 1 -->
+            <div class="glass-card">
+                <div class="glass-card-icon icon-primary">
+                    <i data-lucide="layers"></i>
+                </div>
+                <h3>100% Integral y Completo</h3>
+                <p>Olvídate de tener sistemas separados para calificaciones, asistencia, mensajería y reportería. VeyaSchool centraliza cada rol de la institución en una única base de datos sincronizada en tiempo real mediante Supabase.</p>
+                <div class="glass-card-footer">
+                    Explorar módulos
+                    <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+                </div>
+            </div>
+
+            <!-- Pilar 2 -->
+            <div class="glass-card">
+                <div class="glass-card-icon icon-secondary">
+                    <i data-lucide="zap"></i>
+                </div>
+                <h3>Máxima Eficiencia y Eficacia</h3>
+                <p>Generación instantánea de boletas de calificaciones en PDF, exportación fluida a Excel, pase de asistencia inteligente y mensajería directa inter-roles con notificaciones en tiempo real para mantener informada a toda la comunidad.</p>
+                <div class="glass-card-footer">
+                    Ver automatizaciones
+                    <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+                </div>
+            </div>
+
+            <!-- Pilar 3 -->
+            <div class="glass-card">
+                <div class="glass-card-icon icon-accent">
+                    <i data-lucide="dollar-sign"></i>
+                </div>
+                <h3>Bajo Costo Garantizado</h3>
+                <p>Nuestra arquitectura cloud-native nos permite ofrecer precios sumamente accesibles sin sacrificar velocidad ni estabilidad. Paga únicamente por el servicio integral que necesitas, eliminando los costos abusivos de licencias individuales por alumno.</p>
+                <div class="glass-card-footer">
+                    Comparar costos
+                    <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vitrina de Módulos (Showcase Interactivo) -->
+    <section class="container showcase-section" id="showcase">
+        <div class="section-header">
+            <span class="tag">Vistas y Roles</span>
+            <h2>Una Experiencia a tu Medida</h2>
+            <p>Explora cómo se adapta VeyaSchool para satisfacer las necesidades operativas de cada miembro de tu equipo escolar.</p>
+        </div>
+
+        <div class="showcase-wrapper">
+            <!-- Navegación de Pestañas -->
+            <div class="showcase-nav">
+                <button class="showcase-btn active" onclick="switchShowcase('admin', this)">
+                    <div class="showcase-btn-icon">
+                        <i data-lucide="shield-check" style="width:20px;height:20px;"></i>
+                    </div>
+                    <div class="showcase-btn-text">
+                        <h4>Administradores y Coordinadores</h4>
+                        <p>Control total, métricas y reportes globales.</p>
+                    </div>
+                </button>
+                <button class="showcase-btn" onclick="switchShowcase('maestro', this)">
+                    <div class="showcase-btn-icon">
+                        <i data-lucide="book-open" style="width:20px;height:20px;"></i>
+                    </div>
+                    <div class="showcase-btn-text">
+                        <h4>Docentes y Profesores</h4>
+                        <p>Calificaciones y registros rápidos.</p>
+                    </div>
+                </button>
+                <button class="showcase-btn" onclick="switchShowcase('estudiante', this)">
+                    <div class="showcase-btn-icon">
+                        <i data-lucide="graduation-cap" style="width:20px;height:20px;"></i>
+                    </div>
+                    <div class="showcase-btn-text">
+                        <h4>Estudiantes y Padres</h4>
+                        <p>Visualización de avances en tiempo real.</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Ventana Simulada de Visualización -->
+            <div class="showcase-display">
+                <div class="window-bar">
+                    <div class="window-dots">
+                        <div class="window-dot"></div>
+                        <div class="window-dot"></div>
+                        <div class="window-dot"></div>
+                    </div>
+                    <div class="window-title" id="window-title-text">Portal VeyaSchool - Administrador</div>
+                    <div class="window-actions"></div>
+                </div>
+                <div class="showcase-content">
+                    
+                    <!-- Vista Administrador -->
+                    <div class="portal-view active" id="view-admin">
+                        <div class="admin-header-row">
+                            <div class="admin-card-metric">
+                                <div class="admin-metric-label">Alumnos Inscritos</div>
+                                <div class="admin-metric-val">1,240</div>
+                            </div>
+                            <div class="admin-card-metric">
+                                <div class="admin-metric-label">Personal Activo</div>
+                                <div class="admin-metric-val">84</div>
+                            </div>
+                            <div class="admin-card-metric">
+                                <div class="admin-metric-label">Mensajes Enviados</div>
+                                <div class="admin-metric-val">12,450</div>
+                            </div>
+                        </div>
+                        <div class="admin-chart-mock">
+                            <div class="admin-metric-label" style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                                Registro de Asistencia Semanal
+                                <span style="color:var(--secondary-light); font-size:0.75rem;">+4.8% vs. Mes Anterior</span>
+                            </div>
+                            <div class="mock-chart-lines">
+                                <div class="mock-chart-col" style="height: 82%;"></div>
+                                <div class="mock-chart-col" style="height: 94%;"></div>
+                                <div class="mock-chart-col" style="height: 88%;"></div>
+                                <div class="mock-chart-col" style="height: 96%;"></div>
+                                <div class="mock-chart-col" style="height: 92%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista Maestro -->
+                    <div class="portal-view" id="view-maestro">
+                        <div class="teacher-view-layout">
+                            <div class="mock-list">
+                                <div class="mock-list-title">Lista de Estudiantes (1ro Básico A)</div>
+                                <div class="teacher-row">
+                                    <span>Alvarez, Sofia</span>
+                                    <input type="text" class="teacher-input-mock" value="95" disabled>
+                                </div>
+                                <div class="teacher-row">
+                                    <span>Castillo, Diego</span>
+                                    <input type="text" class="teacher-input-mock" value="88" disabled>
+                                </div>
+                                <div class="teacher-row">
+                                    <span>Méndez, Isabella</span>
+                                    <input type="text" class="teacher-input-mock" value="92" disabled>
+                                </div>
+                            </div>
+                            <div class="mock-list">
+                                <div class="mock-list-title">Asignaciones Recientes</div>
+                                <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.75rem;">
+                                    <div style="background:rgba(255,255,255,0.02); padding:0.5rem; border-radius:6px; border-left:3px solid var(--primary);">
+                                        <strong>Tarea 3:</strong> Álgebra Lineal
+                                    </div>
+                                    <div style="background:rgba(255,255,255,0.02); padding:0.5rem; border-radius:6px; border-left:3px solid var(--secondary);">
+                                        <strong>Proyecto:</strong> Ecosistemas Locales
+                                    </div>
+                                    <div style="background:rgba(255,255,255,0.02); padding:0.5rem; border-radius:6px; border-left:3px solid var(--accent);">
+                                        <strong>Examen:</strong> Historia del Arte
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista Estudiante -->
+                    <div class="portal-view" id="view-estudiante">
+                        <div class="student-portal-layout">
+                            <div class="student-performance">
+                                <div class="student-circle-container">
+                                    <div class="student-circle">
+                                        <div class="student-circle-val">9.2/10</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                                    <h4 style="color:white; font-size:1.1rem;">¡Felicidades, Sofia!</h4>
+                                    <p style="color:var(--text-muted); font-size:0.85rem; margin:0;">Tu rendimiento actual supera el promedio del aula por un 12%. Mantén la dedicación constante.</p>
+                                </div>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top:0.5rem;">
+                                <div class="admin-card-metric" style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.8rem; color:var(--text-muted);">Asistencia General</span>
+                                    <span style="font-size:1rem; font-weight:800; color:#10b981;">98%</span>
+                                </div>
+                                <div class="admin-card-metric" style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.8rem; color:var(--text-muted);">Tareas Pendientes</span>
+                                    <span style="font-size:1rem; font-weight:800; color:var(--accent);">1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Colegios Aliados (Clientes del Sistema) -->
+    <section class="container schools-section" id="schools">
+        <div class="section-header">
+            <span class="tag">Colegios Aliados</span>
+            <h2>Instituciones que Confían en Nosotros</h2>
+            <p>Establecimientos educativos líderes que ya han transformado su gestión diaria de la mano de VeyaSchool.</p>
+        </div>
+
+        <div class="schools-grid">
+            <!-- Colegio 1 -->
+            <div class="school-card">
+                <div class="school-logo-mock">
+                    <i data-lucide="school" style="width:28px;height:28px;"></i>
+                </div>
+                <h4>Colegio Camporeal</h4>
+                <p>
+                    <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--secondary);"></i>
+                    Campus Central
+                </p>
+                <div class="school-tag">Soporte Activo</div>
+            </div>
+
+            <!-- Colegio 2 -->
+            <div class="school-card">
+                <div class="school-logo-mock">
+                    <i data-lucide="building" style="width:28px;height:28px;"></i>
+                </div>
+                <h4>Instituto Creciendo Juntos</h4>
+                <p>
+                    <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--secondary);"></i>
+                    Sede Norte
+                </p>
+                <div class="school-tag">Soporte Activo</div>
+            </div>
+
+            <!-- Colegio 3 -->
+            <div class="school-card">
+                <div class="school-logo-mock">
+                    <i data-lucide="graduation-cap" style="width:28px;height:28px;"></i>
+                </div>
+                <h4>Liceo Bilingüe San José</h4>
+                <p>
+                    <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--secondary);"></i>
+                    Metropolitana
+                </p>
+                <div class="school-tag">Soporte Activo</div>
+            </div>
+
+            <!-- Colegio 4 -->
+            <div class="school-card">
+                <div class="school-logo-mock">
+                    <i data-lucide="book-open-check" style="width:28px;height:28px;"></i>
+                </div>
+                <h4>Colegio Montessori del Bosque</h4>
+                <p>
+                    <i data-lucide="map-pin" style="width:14px;height:14px;color:var(--secondary);"></i>
+                    Sección Primaria
+                </p>
+                <div class="school-tag">Soporte Activo</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección CTA Llamado a la Acción -->
+    <section class="container cta-section">
+        <div class="cta-wrapper">
+            <h2>Lleva tu Institución al Siguiente Nivel</h2>
+            <p>Únete a las decenas de escuelas que ya disfrutan de una gestión sin complicaciones, boletas automáticas y sincronización instantánea.</p>
+            <a href="./app.html" class="btn-primary-gradient">
+                Ingresar al Portal VeyaSchool
+                <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Pie de Página -->
+    <footer>
+        <div class="container footer-wrapper">
+            <div class="footer-copy">
+                <a href="#" class="logo" style="font-size:1.25rem;">
+                    <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="32" height="32" rx="10" fill="url(#logo-grad-2)" />
+                        <path d="M18 10L27 14.5L18 19L9 14.5L18 10Z" fill="white" />
+                        <path d="M12.5 17.5V23C12.5 24.5 15 26 18 26C21 26 23.5 24.5 23.5 23V17.5L18 20.25L12.5 17.5Z" fill="rgba(255,255,255,0.85)" />
+                        <defs>
+                            <linearGradient id="logo-grad-2" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#4f46e5" />
+                                <stop offset="1" stop-color="#06b6d4" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span>VeyaSchool</span>
+                </a>
+                <span>© 2026 VeyaSchool. Todos los derechos reservados.</span>
+            </div>
+            
+            <div class="footer-links">
+                <a href="#features">Pilares</a>
+                <a href="#showcase">Módulos</a>
+                <a href="#schools">Colegios</a>
+                <a href="./app.html">Portal Escolar</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script de Interacción y Animaciones de Liquid Glass -->
+    <script>
+        // Inicializar Iconos Lucide
+        lucide.createIcons();
+
+        // Efecto de Scroll Header Blur
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Efecto Liquid Glass 3D interactivo con el ratón en la imagen de iPhone
+        const phone = document.getElementById('interactive-phone');
+        const container = document.querySelector('.mockup-container');
+
+        if(phone && container) {
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left - (rect.width/2);
+                const y = e.clientY - rect.top - (rect.height/2);
+                
+                // Limitar la rotación
+                const rotX = -(y / rect.height) * 20; 
+                const rotY = (x / rect.width) * 20;
+                
+                phone.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-5px)`;
+                
+                // Mover el brillo del vidrio líquido según la posición del cursor
+                const shinyX = (e.clientX - rect.left) / rect.width * 100;
+                const shinyY = (e.clientY - rect.top) / rect.height * 100;
+                phone.style.setProperty('--shiny-x', `${shinyX}%`);
+                phone.style.setProperty('--shiny-y', `${shinyY}%`);
+            });
+
+            container.addEventListener('mouseleave', () => {
+                phone.style.transform = 'rotateX(0deg) rotateY(0deg) translateY(0px)';
+            });
+        }
+
+        // Animación de los gráficos simulados
+        function triggerChartAnimation() {
+            const columns = document.querySelectorAll('.mock-chart-col');
+            const heights = ['82%', '94%', '88%', '96%', '92%'];
+            columns.forEach((col, idx) => {
+                col.style.height = '0%';
+                setTimeout(() => {
+                    col.style.height = heights[idx];
+                }, 100 + (idx * 80));
+            });
+        }
+
+        // Gatillo inicial
+        setTimeout(triggerChartAnimation, 500);
+
+        // Control de Pestañas de la Vitrina Interactiva (Showcase)
+        function switchShowcase(portalType, buttonElement) {
+            // Desactivar botones
+            document.querySelectorAll('.showcase-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Activar botón seleccionado
+            buttonElement.classList.add('active');
+
+            // Cambiar título de la ventana simulada
+            const windowTitle = document.getElementById('window-title-text');
+            const views = {
+                admin: "Portal VeyaSchool - Administrador",
+                maestro: "Portal VeyaSchool - Maestro (Ingreso de Notas)",
+                estudiante: "Portal VeyaSchool - Estudiante (Boleta de Notas)"
+            };
+            windowTitle.textContent = views[portalType];
+
+            // Ocultar vistas con animación
+            document.querySelectorAll('.portal-view').forEach(view => {
+                view.classList.remove('active');
+            });
+
+            // Mostrar vista seleccionada
+            const targetView = document.getElementById(`view-${portalType}`);
+            if (targetView) {
+                targetView.classList.add('active');
+                if (portalType === 'admin') {
+                    triggerChartAnimation();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
