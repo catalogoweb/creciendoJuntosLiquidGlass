@@ -2864,19 +2864,11 @@
                 .eq('activo', true)
                 .order('id', { ascending: true });
 
-            // ✅ CARGAR NOTAS + INFO DE QUIEN MODIFICÓ
-            // Necesitamos hacer un join con profiles para saber el nombre del "ingresado_por"
-            // Nota: Si "ingresado_por" es un UUID, Supabase lo resolverá si hay relación.
-            // Si no tienes la relación configurada en BD, solo mostraremos el ID o "Usuario".
-            // Asumiremos que traemos el campo raw por ahora.
-
             const actividadIds = app.data.actividades.map(a => a.id);
-            let notasMap = {}; // Guardar nota
-            let auditMap = {}; // Guardar quién modificó
+            let notasMap = {};
+            let auditMap = {};
 
             if (actividadIds.length > 0) {
-                // Intentamos traer el nombre del perfil que ingresó la nota
-                // Si da error de relación, usa la consulta simple comentada abajo
                 const { data: todasNotas } = await supabaseClient
                     .from('notas')
                     .select('*, profiles:ingresado_por(nombre_completo)')
@@ -2885,7 +2877,6 @@
                 todasNotas?.forEach(n => {
                     const key = `${n.estudiante_id}_${n.actividad_id}`;
                     notasMap[key] = n.nota;
-                    // Guardar nombre del modificador
                     const nombreModificador = n.profiles?.nombre_completo || 'Sistema';
                     const fechaMod = new Date(n.updated_at || n.created_at).toLocaleDateString();
                     auditMap[key] = `Modificado por: ${nombreModificador} (${fechaMod})`;
@@ -2897,12 +2888,27 @@
                 ? "renderView('supervision')"
                 : `verDetallesCurso('${cursoId}', '${gradoId}', '${seccionId}')`;
 
+            // ✅ FILTRO POR UNIDAD: Obtener unidades que tienen actividades en este curso/sección
+            await loadUnidades();
+            const unidadesConActividades = app.data.unidades.filter(u =>
+                app.data.actividades.some(a => a.unidad_id === u.id)
+            );
+
+            // Leer unidad actualmente seleccionada (guardada en variable global)
+            const unidadFiltroActual = window._libroUnidadFiltro || '';
+
+            // Filtrar actividades por la unidad seleccionada
+            const actividadesFiltradas = unidadFiltroActual
+                ? app.data.actividades.filter(a => a.unidad_id === unidadFiltroActual)
+                : app.data.actividades;
+
             content.innerHTML = `
                 <div class="card">
                     <div class="card-header">
                         <span>📊 Notas: ${cursoData?.nombre || 'Curso'}</span>
                         <div class="btn-group">
                             <button class="btn btn-success btn-sm" onclick="guardarTodasNotasLibro()">💾 Guardar Cambios</button>
+                            <button class="btn btn-info btn-sm" onclick="abrirBackupDesdeLibro('${cursoId}', '${gradoId}', '${seccionId}')">📥 Backup / Importar</button>
                             <button class="btn btn-secondary btn-sm" onclick="${backAction}">← Volver</button>
                         </div>
                     </div>
@@ -2912,42 +2918,61 @@
                         El sistema calculará automáticamente los puntos netos según el valor de cada actividad.
                     </div>
 
+                    <!-- ✅ SELECTOR DE UNIDAD -->
+                    <div style="background: var(--bg-primary); padding: 0.75rem 1rem; border-radius: var(--radius); margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <label style="font-weight: 600; white-space: nowrap;">📖 Filtrar por Unidad:</label>
+                        <select id="filtroUnidadLibro" class="form-select" style="max-width: 320px;" onchange="cambiarFiltroUnidadLibro('${cursoId}', '${gradoId}', '${seccionId}', ${esSupervision})">
+                            <option value="">— Todas las unidades —</option>
+                            ${unidadesConActividades.map(u => `
+                                <option value="${u.id}" ${unidadFiltroActual === u.id ? 'selected' : ''}>
+                                    Unidad ${u.numero}: ${u.nombre}
+                                </option>
+                            `).join('')}
+                        </select>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                            Mostrando <strong>${actividadesFiltradas.length}</strong> actividad(es)
+                        </span>
+                    </div>
+
                     <div class="table-container">
                         <table class="gradebook-table">
                             <thead>
                                 <tr>
                                     <th style="min-width: 200px;">Estudiante</th>
-                                    ${app.data.actividades.map(a => `
+                                    ${actividadesFiltradas.length > 0 ? actividadesFiltradas.map(a => `
                                         <th style="min-width: 100px; text-align:center;">
                                             <div title="${a.descripcion || ''}">
-                                                ${a.titulo.substring(0, 15)}...<br>
+                                                ${a.titulo.substring(0, 15)}${a.titulo.length > 15 ? '...' : ''}<br>
                                                 <small class="badge badge-secondary" style="font-size:0.7em">Vale ${a.puntaje_maximo} pts</small>
                                             </div>
                                         </th>
-                                    `).join('')}
-                                    <!-- ✅ CAMBIO DE NOMBRE DE COLUMNA -->
+                                    `).join('') : '<th>Sin actividades</th>'}
                                     <th style="min-width: 80px;">Promedio</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${estudiantesCurso && estudiantesCurso.length > 0 ? estudiantesCurso.map(ec => {
+                                ${actividadesFiltradas.length === 0 ? `
+                                    <tr>
+                                        <td colspan="2" style="text-align:center; padding: 2rem; color: var(--text-secondary);">
+                                            ⚠️ No hay actividades en la unidad seleccionada.
+                                        </td>
+                                    </tr>
+                                ` : estudiantesCurso && estudiantesCurso.length > 0 ? estudiantesCurso.map(ec => {
                 const est = ec.profiles;
                 let sumaPuntosNetos = 0;
-                let sumaMaximos = 0; // Para calcular porcentaje real
+                let sumaMaximos = 0;
 
-                const filaCeldas = app.data.actividades.map(act => {
+                const filaCeldas = actividadesFiltradas.map(act => {
                     const key = `${est.id}_${act.id}`;
                     const nota = notasMap[key] !== undefined ? notasMap[key] : '';
                     const infoAudit = auditMap[key] || 'Sin calificar';
 
-                    // Cálculo visual en tiempo real para el promedio de la fila
                     if (nota !== '') {
                         const puntos = (parseFloat(nota) / 100) * act.puntaje_maximo;
                         sumaPuntosNetos += puntos;
                         sumaMaximos += act.puntaje_maximo;
                     }
 
-                    // --- LOGICA DE VISUALIZACIÓN DE ICONOS EN EL LIBRO ---
                     let displayExtra = '';
                     const isIconMode = cursoData.descripcion && cursoData.descripcion.includes('[ICONOS]');
 
@@ -2955,9 +2980,7 @@
                         const info = getGradingInfo(parseFloat(nota));
                         displayExtra = `<div style="font-size: 0.85rem; margin-top: 2px; line-height: 1.1;" title="${info.label}">${info.faceIcon}<br>${info.label}</div>`;
                     }
-                    // -----------------------------------------------------
 
-                    // ✅ RESTRICCIÓN: Si ya hay nota y no es modo supervisión, deshabilitar
                     const isDisabled = (nota !== '' && !esSupervision) ? 'disabled' : '';
                     const toolTipText = (nota !== '' && !esSupervision)
                         ? `${infoAudit}\n(Solo el coordinador puede modificar esta nota)`
@@ -2981,11 +3004,9 @@
                                         `;
                 }).join('');
 
-                // ✅ CALCULO DE PROMEDIO FINAL (PORCENTAJE 0-100%)
                 const porcentajeFila = sumaMaximos > 0 ? (sumaPuntosNetos / sumaMaximos) * 100 : 0;
                 const colorProm = porcentajeFila < 60 ? 'red' : 'green';
                 let promedioDisplay = porcentajeFila.toFixed(2);
-
                 const isIconModeProm = cursoData.descripcion && cursoData.descripcion.includes('[ICONOS]');
 
                 if (isIconModeProm) {
@@ -3025,7 +3046,6 @@
                 for (const input of inputs) {
                     const nota = input.value;
                     if (nota !== '' && nota !== null) {
-                        // Validación estricta 0-100
                         if (parseFloat(nota) > 100) {
                             showNotification('Error: Las notas no pueden ser mayores a 100', 'danger');
                             input.style.border = "2px solid red";
@@ -3040,7 +3060,6 @@
                 if (hayCambios) {
                     limpiarCachePromedios();
                     showNotification('Notas guardadas exitosamente.', 'success');
-                    // ✅ RECARGAR EL LIBRO PARA BLOQUEAR LOS NUEVOS INPUTS
                     await abrirLibroCalificaciones(cursoId, gradoId, seccionId, esSupervision);
                 } else {
                     showNotification('No hay nuevas notas para guardar.', 'info');
@@ -3049,6 +3068,16 @@
                 if (btn) { btn.disabled = false; btn.textContent = '💾 Guardar Cambios'; }
             };
         } //fin de libro calificaciones
+
+        // ✅ Limpiar filtro al abrir un libro nuevo (desde un curso diferente)
+        window._libroUnidadFiltro = '';
+
+        // ✅ Función global para cambiar filtro de unidad en el libro de calificaciones
+        window.cambiarFiltroUnidadLibro = async function(cursoId, gradoId, seccionId, esSupervision) {
+            const select = document.getElementById('filtroUnidadLibro');
+            window._libroUnidadFiltro = select ? select.value : '';
+            await abrirLibroCalificaciones(cursoId, gradoId, seccionId, esSupervision);
+        };
 
         // ==========================================
         // MODALES (se mantienen los anteriores y se agregan nuevos)
@@ -3854,6 +3883,7 @@
         }
 
         function getMenuByRole(rol) {
+            const activeRol = rol === 'supervisor' ? 'coordinador' : rol;
             const menus = {
                 admin: [
                     { view: 'dashboard', icon: '📊', label: 'Dashboard' },
@@ -3866,6 +3896,7 @@
                     { view: 'inscripciones', icon: '📝', label: 'Inscripciones' },
                     { view: 'boletas', icon: '📋', label: 'Boletas' },
                     { view: 'reporte-asistencia', icon: '📅', label: 'Reporte Asistencia' },
+                    { view: 'backup-notas', icon: '💾', label: 'Backup de Notas' },
                     { view: 'mensajes', icon: '📩', label: 'Mensajes', badge: true }
                 ],
                 coordinador: [
@@ -3874,12 +3905,14 @@
                     { view: 'estudiantes', icon: '👨‍🎓', label: 'Estudiantes' },
                     { view: 'boletas', icon: '📋', label: 'Boletas' },
                     { view: 'reporte-asistencia', icon: '📅', label: 'Reporte Asistencia' },
+                    { view: 'backup-notas', icon: '💾', label: 'Backup de Notas' },
                     { view: 'mensajes', icon: '📩', label: 'Mensajes', badge: true }
                 ],
                 maestro: [
                     { view: 'dashboard', icon: '📊', label: 'Dashboard' },
                     { view: 'mis-cursos', icon: '📚', label: 'Mis Cursos' },
                     { view: 'asignarme-cursos', icon: '➕', label: 'Asignarme Cursos' },
+                    { view: 'backup-notas', icon: '💾', label: 'Backup de Notas' },
                     { view: 'mensajes', icon: '📩', label: 'Mensajes', badge: true }
                 ],
                 estudiante: [
@@ -3890,7 +3923,7 @@
                     { view: 'mensajes', icon: '📩', label: 'Mensajes', badge: true }
                 ]
             };
-            return menus[rol] || [];
+            return menus[activeRol] || [];
         }
 
         async function renderView(viewName) {
@@ -3956,6 +3989,9 @@
                         // ✅ NUEVO CASO PARA COORDINADOR
                         case 'supervision':
                             return await renderSupervisionCursos();
+
+                        case 'backup-notas':
+                            return await renderBackupNotasView();
 
                         case 'configuracion':
                             return await renderConfiguracion();
@@ -4242,6 +4278,527 @@
                 }
             }
         }
+
+        // ==========================================
+        // SISTEMA DE BACKUP Y RESTAURACIÓN DE NOTAS POR UNIDAD
+        // ==========================================
+
+        // Variable global para pre-selección desde el Libro de Calificaciones
+        window.preSelectedBackup = null;
+
+        window.abrirBackupDesdeLibro = function(cursoId, gradoId, seccionId) {
+            window.preSelectedBackup = { cursoId, gradoId, seccionId };
+            changeView('backup-notas');
+        };
+
+        async function renderBackupNotasView() {
+            if (!['admin', 'coordinador', 'supervisor', 'maestro'].includes(app.currentUser.rol)) {
+                return `
+                    <div class="card">
+                        <div class="alert alert-danger">
+                            ⚠️ <strong>Acceso Denegado:</strong> No tienes permisos para acceder a esta sección.
+                        </div>
+                    </div>
+                `;
+            }
+
+            try {
+                // Cargar catálogo de unidades
+                await loadUnidades();
+
+                const preSel = window.preSelectedBackup;
+                window.preSelectedBackup = null; // Limpiar para futuras visitas
+
+                // Cargar cursos asignados según rol del usuario
+                let asignaciones = [];
+                if (app.currentUser.rol === 'maestro') {
+                    await loadMisCursos();
+                    asignaciones = app.data.misCursos;
+                } else {
+                    // Admin, Coordinador o Supervisor
+                    const { data, error } = await supabaseClient
+                        .from('curso_asignaciones')
+                        .select(`
+                            *,
+                            cursos (id, nombre, codigo),
+                            profiles (nombre_completo),
+                            secciones (
+                                id, 
+                                nombre, 
+                                grado_id, 
+                                grados (id, nombre)
+                            )
+                        `)
+                        .eq('activo', true);
+
+                    if (error) throw error;
+                    asignaciones = data || [];
+                }
+
+                // Generar HTML de la vista
+                const html = `
+                    <div class="card">
+                        <div class="card-header">
+                            <span>💾 Backup de Notas por Unidad</span>
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>📊 Respaldar y Restaurar Calificaciones:</strong> Selecciona un curso y una unidad para descargar un archivo de backup en Excel (.xlsx) o restaurar notas previamente guardadas.
+                        </div>
+
+                        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 0;">
+                            <div class="form-group">
+                                <label class="form-label" for="backupAsignacion">1. Seleccionar Curso y Sección:</label>
+                                <select id="backupAsignacion" class="form-select">
+                                    <option value="">-- Selecciona un curso --</option>
+                                    ${asignaciones.map(a => {
+                                        const curso = a.cursos;
+                                        const seccion = a.secciones;
+                                        const grado = seccion?.grados;
+                                        const maestro = a.profiles?.nombre_completo || 'Sin asignar';
+
+                                        if (!curso || !seccion || !grado) return '';
+
+                                        const valueStr = `${a.curso_id}|${seccion?.grado_id || grado?.id || ''}|${seccion.id}|${curso.nombre}|${grado?.nombre || ''}|${seccion.nombre}`;
+                                        
+                                        // Verificar si debe estar pre-seleccionado
+                                        const isSelected = preSel && preSel.cursoId === a.curso_id && preSel.seccionId === seccion.id ? 'selected' : '';
+
+                                        const labelStr = app.currentUser.rol === 'maestro'
+                                            ? `${curso.nombre} - ${grado.nombre} - Sec. ${seccion.nombre}`
+                                            : `${curso.nombre} - ${grado.nombre} - Sec. ${seccion.nombre} (Prof. ${maestro})`;
+
+                                        return `<option value="${valueStr}" ${isSelected}>${labelStr}</option>`;
+                                    }).join('')}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="backupUnidad">2. Seleccionar Unidad:</label>
+                                <select id="backupUnidad" class="form-select">
+                                    <option value="">-- Selecciona una unidad --</option>
+                                    ${app.data.unidades.map(u => `
+                                        <option value="${u.id}|${u.numero}">${u.nombre} (Unidad ${u.numero} - ${u.año})</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        <!-- EXPORTAR BACKUP -->
+                        <div class="card">
+                            <div class="card-header" style="font-size: 1.15rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                                📥 Exportar Backup (Descargar)
+                            </div>
+                            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                                Descarga un archivo de Excel estructurado con la información de los estudiantes inscritos, actividades planificadas para la unidad seleccionada y todas sus notas actuales.
+                            </p>
+                            <button class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onclick="ejecutarExportarBackup()">
+                                📥 Descargar Backup Excel (.xlsx)
+                            </button>
+                        </div>
+
+                        <!-- IMPORTAR BACKUP -->
+                        <div class="card">
+                            <div class="card-header" style="font-size: 1.15rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                                📤 Restaurar Backup (Importar)
+                            </div>
+                            <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                                Sube el archivo Excel de backup correspondiente para restaurar las calificaciones de los estudiantes en la unidad seleccionada.
+                            </p>
+                            
+                            <input type="file" id="fileInputBackup" class="file-input-hidden" accept=".xlsx,.xls" onchange="procesarArchivoBackup(event)">
+                            
+                            <div class="drop-zone" id="dropZoneBackup" style="padding: 1.5rem 1rem;" onclick="document.getElementById('fileInputBackup').click()">
+                                <div class="drop-zone-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">📁</div>
+                                <h3>Arrastra tu archivo aquí</h3>
+                                <p style="font-size: 0.8rem;">o haz clic para seleccionar</p>
+                            </div>
+
+                            <div id="backupImportProgress" class="hidden">
+                                <div class="alert alert-info" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem; text-align: center;">
+                                    <strong>⏳ Procesando archivo de backup...</strong>
+                                    <div class="spinner" style="width: 24px; height: 24px; margin: 0.5rem auto;"></div>
+                                </div>
+                            </div>
+
+                            <div id="backupImportResults" class="import-results hidden" style="margin-top: 1rem;"></div>
+                        </div>
+                    </div>
+                `;
+
+                // Configurar drag & drop de backup
+                setTimeout(() => {
+                    const dropZone = document.getElementById('dropZoneBackup');
+                    if (dropZone) {
+                        dropZone.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                            dropZone.classList.add('dragover');
+                        });
+
+                        dropZone.addEventListener('dragleave', () => {
+                            dropZone.classList.remove('dragover');
+                        });
+
+                        dropZone.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            dropZone.classList.remove('dragover');
+
+                            const files = e.dataTransfer.files;
+                            if (files.length > 0) {
+                                const fileInput = document.getElementById('fileInputBackup');
+                                if (fileInput) {
+                                    fileInput.files = files;
+                                    procesarArchivoBackup({ target: { files } });
+                                }
+                            }
+                        });
+                    }
+                }, 100);
+
+                return html;
+            } catch (error) {
+                console.error('Error renderizando vista de backup:', error);
+                return `<div class="alert alert-danger">Error al cargar la vista de backup: ${error.message}</div>`;
+            }
+        }
+
+        async function ejecutarExportarBackup() {
+            const selectAsig = document.getElementById('backupAsignacion');
+            const selectUni = document.getElementById('backupUnidad');
+
+            if (!selectAsig || !selectAsig.value) {
+                showNotification('Por favor, selecciona un curso y sección.', 'warning');
+                return;
+            }
+            if (!selectUni || !selectUni.value) {
+                showNotification('Por favor, selecciona una unidad.', 'warning');
+                return;
+            }
+
+            const [cursoId, gradoId, seccionId, cursoNombre, gradoNombre, seccionNombre] = selectAsig.value.split('|');
+            const [unidadId, unidadNumero] = selectUni.value.split('|');
+
+            showNotification('Generando archivo de backup...', 'info');
+
+            try {
+                // 1. Obtener estudiantes inscritos en esta sección
+                const { data: estudiantesCurso, error: estError } = await supabaseClient
+                    .from('estudiante_cursos')
+                    .select('estudiante_id, profiles!inner (id, nombre_completo, codigo_estudiante)')
+                    .eq('curso_id', cursoId)
+                    .eq('seccion_id', seccionId)
+                    .eq('activo', true)
+                    .order('id', { ascending: true });
+
+                if (estError) throw estError;
+
+                if (!estudiantesCurso || estudiantesCurso.length === 0) {
+                    showNotification('No hay estudiantes inscritos en este curso y sección.', 'warning');
+                    return;
+                }
+
+                // 2. Obtener actividades de esta unidad
+                const { data: actividades, error: actError } = await supabaseClient
+                    .from('actividades')
+                    .select('*')
+                    .eq('curso_id', cursoId)
+                    .eq('grado_id', gradoId)
+                    .eq('seccion_id', seccionId)
+                    .eq('unidad_id', unidadId);
+
+                if (actError) throw actError;
+
+                if (!actividades || actividades.length === 0) {
+                    showNotification('No hay actividades planificadas para esta unidad.', 'warning');
+                    return;
+                }
+
+                const actividadIds = actividades.map(a => a.id);
+
+                // 3. Obtener notas
+                const { data: todasNotas, error: notasError } = await supabaseClient
+                    .from('notas')
+                    .select('*')
+                    .in('actividad_id', actividadIds);
+
+                if (notasError) throw notasError;
+
+                // Mapear notas
+                const notasMap = {};
+                todasNotas?.forEach(n => {
+                    notasMap[`${n.estudiante_id}_${n.actividad_id}`] = n.nota;
+                });
+
+                // 4. Estructurar metadatos de configuración
+                const configData = {
+                    'Tipo_Backup': 'VeyaSchool_Notas_Unidad',
+                    'Curso_ID': cursoId,
+                    'Curso_Nombre': cursoNombre,
+                    'Grado_ID': gradoId,
+                    'Grado_Nombre': gradoNombre,
+                    'Seccion_ID': seccionId,
+                    'Seccion_Nombre': seccionNombre,
+                    'Unidad_ID': unidadId,
+                    'Unidad_Numero': unidadNumero,
+                    'Fecha_Generacion': new Date().toISOString(),
+                    'Exportado_Por': app.currentUser.nombre_completo
+                };
+
+                // 5. Preparar hoja de Calificaciones
+                const headers = ['ID Estudiante', 'Código Estudiante', 'Nombre Estudiante'];
+                actividades.forEach(a => {
+                    headers.push(`${a.id} | ${a.titulo} (Max ${a.puntaje_maximo} pts)`);
+                });
+                headers.push('Promedio');
+
+                const rowsData = estudiantesCurso.map(ec => {
+                    const est = ec.profiles;
+                    const row = [est.id, est.codigo_estudiante || '', est.nombre_completo];
+
+                    let sumaPuntosNetos = 0;
+                    let sumaMaximos = 0;
+
+                    actividades.forEach(a => {
+                        const key = `${est.id}_${a.id}`;
+                        const notaVal = notasMap[key];
+
+                        if (notaVal !== undefined && notaVal !== null && notaVal !== '') {
+                            row.push(notaVal);
+                            sumaPuntosNetos += (parseFloat(notaVal) / 100) * a.puntaje_maximo;
+                            sumaMaximos += a.puntaje_maximo;
+                        } else {
+                            row.push('');
+                        }
+                    });
+
+                    const promedio = sumaMaximos > 0 ? ((sumaPuntosNetos / sumaMaximos) * 100).toFixed(2) : '0.00';
+                    row.push(promedio);
+
+                    return row;
+                });
+
+                // 6. Construir libro Excel
+                const wb = XLSX.utils.book_new();
+
+                // Hoja 1: Calificaciones (se agrega primero para que Excel la muestre por defecto al abrir)
+                const wsCalificaciones = XLSX.utils.aoa_to_sheet([headers, ...rowsData]);
+
+                // Ajustar anchos de columnas
+                wsCalificaciones['!cols'] = [
+                    { wch: 38 }, // ID Estudiante
+                    { wch: 18 }, // Código Estudiante
+                    { wch: 30 }  // Nombre Estudiante
+                ];
+                actividades.forEach(() => {
+                    wsCalificaciones['!cols'].push({ wch: 22 });
+                });
+                wsCalificaciones['!cols'].push({ wch: 12 }); // Promedio
+
+                XLSX.utils.book_append_sheet(wb, wsCalificaciones, 'Calificaciones');
+
+                // Hoja 2: Configuración (se agrega de segunda para guardar metadatos de validación)
+                const configAOA = Object.entries(configData);
+                const wsConfig = XLSX.utils.aoa_to_sheet([['Parámetro', 'Valor'], ...configAOA]);
+                XLSX.utils.book_append_sheet(wb, wsConfig, 'Config_Backup');
+
+                // Descargar archivo Excel
+                const cleanCurso = cursoNombre.replace(/[^a-zA-Z0-9]/g, '_');
+                const cleanSec = seccionNombre.replace(/[^a-zA-Z0-9]/g, '_');
+                const fechaStr = new Date().toISOString().split('T')[0];
+                const fileName = `BackupNotas_${cleanCurso}_Sec_${cleanSec}_U${unidadNumero}_${fechaStr}.xlsx`;
+
+                XLSX.writeFile(wb, fileName);
+                showNotification('📥 Backup generado y descargado correctamente.', 'success');
+            } catch (err) {
+                console.error(err);
+                showNotification('Error al exportar backup: ' + err.message, 'danger');
+            }
+        }
+
+        async function procesarArchivoBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const progress = document.getElementById('backupImportProgress');
+            const resultsDiv = document.getElementById('backupImportResults');
+
+            if (progress) progress.classList.remove('hidden');
+            if (resultsDiv) {
+                resultsDiv.classList.add('hidden');
+                resultsDiv.innerHTML = '';
+            }
+
+            try {
+                const data = await file.arrayBuffer();
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // 1. Leer y validar Config_Backup
+                const configSheet = workbook.Sheets['Config_Backup'];
+                if (!configSheet) {
+                    throw new Error('El archivo no parece ser un backup válido (Falta la pestaña Config_Backup).');
+                }
+
+                const configJson = XLSX.utils.sheet_to_json(configSheet);
+                const config = {};
+                configJson.forEach(row => {
+                    config[row['Parámetro']] = row['Valor'];
+                });
+
+                if (config['Tipo_Backup'] !== 'VeyaSchool_Notas_Unidad') {
+                    throw new Error('El archivo no es un Backup de Calificaciones válido de VeyaSchool.');
+                }
+
+                const fileCursoId = config['Curso_ID'];
+                const fileCursoNombre = config['Curso_Nombre'];
+                const fileSeccionId = config['Seccion_ID'];
+                const fileSeccionNombre = config['Seccion_Nombre'];
+                const fileUnidadId = config['Unidad_ID'];
+                const fileUnidadNumero = config['Unidad_Numero'];
+
+                // Validar contra selectores
+                const selectAsig = document.getElementById('backupAsignacion');
+                const selectUni = document.getElementById('backupUnidad');
+
+                if (!selectAsig || !selectAsig.value) {
+                    throw new Error('Por favor, selecciona en la interfaz el Curso y Sección correspondientes antes de importar.');
+                }
+                if (!selectUni || !selectUni.value) {
+                    throw new Error('Por favor, selecciona en la interfaz la Unidad correspondiente antes de importar.');
+                }
+
+                const [selCursoId, selGradoId, selSeccionId, selCursoNombre, selGradoNombre, selSeccionNombre] = selectAsig.value.split('|');
+                const [selUnidadId, selUnidadNumero] = selectUni.value.split('|');
+
+                if (fileCursoId !== selCursoId || fileSeccionId !== selSeccionId) {
+                    if (!confirm(`⚠️ ALERTA DE COINCIDENCIA:\nEl archivo contiene notas para "${fileCursoNombre}" (Sección ${fileSeccionNombre}), pero has seleccionado "${selCursoNombre}" (Sección ${selSeccionNombre}).\n\n¿Estás seguro de que deseas continuar e importar estas notas en el curso seleccionado?`)) {
+                        if (progress) progress.classList.add('hidden');
+                        return;
+                    }
+                }
+
+                if (fileUnidadId !== selUnidadId) {
+                    if (!confirm(`⚠️ ALERTA DE UNIDAD:\nEl archivo corresponde a la Unidad ${fileUnidadNumero}, pero has seleccionado la Unidad ${selUnidadNumero}.\n\n¿Deseas continuar e importar las notas en la Unidad ${selUnidadNumero}?`)) {
+                        if (progress) progress.classList.add('hidden');
+                        return;
+                    }
+                }
+
+                // 2. Leer Calificaciones
+                const califSheet = workbook.Sheets['Calificaciones'];
+                if (!califSheet) {
+                    throw new Error('No se encontró la pestaña "Calificaciones" en el archivo de backup.');
+                }
+
+                const califRows = XLSX.utils.sheet_to_json(califSheet, { header: 1 });
+                if (califRows.length < 2) {
+                    throw new Error('La pestaña "Calificaciones" no tiene datos válidos.');
+                }
+
+                const headers = califRows[0];
+                const dataRows = califRows.slice(1);
+
+                const idEstudianteIdx = headers.indexOf('ID Estudiante');
+                const nombreEstudianteIdx = headers.indexOf('Nombre Estudiante');
+
+                if (idEstudianteIdx === -1) {
+                    throw new Error('No se encontró la columna "ID Estudiante" en el archivo.');
+                }
+
+                // Obtener columnas de actividades
+                const actividadCols = [];
+                headers.forEach((h, idx) => {
+                    if (idx > nombreEstudianteIdx && h !== 'Promedio') {
+                        const parts = h.split('|');
+                        if (parts.length > 0) {
+                            actividadCols.push({
+                                index: idx,
+                                id: parts[0].trim(),
+                                fullHeader: h
+                            });
+                        }
+                    }
+                });
+
+                if (actividadCols.length === 0) {
+                    throw new Error('No se detectaron columnas de actividades en la hoja de calificaciones.');
+                }
+
+                // 3. Procesar filas e importar notas
+                let successCount = 0;
+                let warningCount = 0;
+                let errorCount = 0;
+                const logs = [];
+
+                for (const row of dataRows) {
+                    const estId = row[idEstudianteIdx];
+                    const estNombre = row[nombreEstudianteIdx] || 'Estudiante Desconocido';
+
+                    if (!estId) {
+                        warningCount++;
+                        logs.push(`<div class="import-row warning" style="margin: 0.25rem 0; padding: 0.25rem;">⚠️ Fila omitida: Nombre "${estNombre}" no tiene un ID de estudiante.</div>`);
+                        continue;
+                    }
+
+                    for (const act of actividadCols) {
+                        const notaVal = row[act.index];
+
+                        // Si la celda está vacía, no modificamos para evitar sobrescribir notas existentes con blanco
+                        if (notaVal === undefined || notaVal === null || notaVal === '') {
+                            continue;
+                        }
+
+                        const parsedNota = parseFloat(notaVal);
+                        if (isNaN(parsedNota) || parsedNota < 0 || parsedNota > 100) {
+                            warningCount++;
+                            logs.push(`<div class="import-row warning" style="margin: 0.25rem 0; padding: 0.25rem;">⚠️ Nota inválida (${notaVal}) para ${estNombre} en actividad ${act.id}. Debe ser entre 0 y 100.</div>`);
+                            continue;
+                        }
+
+                        // Guardar la nota en Supabase
+                        const result = await guardarNota(estId, act.id, parsedNota, 'Restaurado desde Backup');
+                        if (result) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                            logs.push(`<div class="import-row error" style="margin: 0.25rem 0; padding: 0.25rem;">❌ Error guardando nota para ${estNombre} en actividad ${act.id}.</div>`);
+                        }
+                    }
+                }
+
+                if (progress) progress.classList.add('hidden');
+                if (resultsDiv) {
+                    resultsDiv.classList.remove('hidden');
+
+                    let summaryHtml = `
+                        <div class="alert alert-success" style="padding: 0.75rem 1rem; margin-bottom: 0.5rem;">
+                            <strong>Importación finalizada con éxito:</strong><br>
+                            - Notas restauradas/actualizadas: <strong>${successCount}</strong><br>
+                            - Advertencias: <strong>${warningCount}</strong><br>
+                            - Errores: <strong>${errorCount}</strong>
+                        </div>
+                    `;
+
+                    if (logs.length > 0) {
+                        summaryHtml += `<div style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 6px; background: var(--bg-primary);">${logs.join('')}</div>`;
+                    }
+
+                    resultsDiv.innerHTML = summaryHtml;
+                }
+
+                limpiarCachePromedios();
+                showNotification(`Backup restaurado. Notas guardadas: ${successCount}`, 'success');
+            } catch (err) {
+                console.error(err);
+                if (progress) progress.classList.add('hidden');
+                if (resultsDiv) {
+                    resultsDiv.classList.remove('hidden');
+                    resultsDiv.innerHTML = `<div class="alert alert-danger" style="padding: 0.75rem 1rem;"><strong>Error:</strong> ${err.message}</div>`;
+                }
+                showNotification('Error al importar backup: ' + err.message, 'danger');
+            }
+        }
+
         // ==========================================
         // FUNCIÓN renderEstudiantes ACTUALIZADA
         // ==========================================
@@ -6038,6 +6595,9 @@
             await loadUnidades();
             // Cargar actividades SOLO de esta sección
             await loadActividades(cursoId, gradoId, seccionId);
+
+            // ✅ Limpiar filtro de unidad del libro al entrar a un curso
+            window._libroUnidadFiltro = '';
 
             const cursoObj = app.data.misCursos.find(mc => mc.curso_id === cursoId);
             const curso = cursoObj ? cursoObj.cursos : { nombre: 'Curso', descripcion: '' };
