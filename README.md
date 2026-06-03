@@ -25,4 +25,4 @@ Sección "A"	enritec@gmail.com	Activo
 	Estudiante de Tecnologia	1ro básico
 Sección "A"	mymacbook.os15@gmail.com
 
-supabase: elvis.santizob@gmail.com
+supabase: elvis.santizob@gmail.com -  tecnologia.camporeal
